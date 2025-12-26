@@ -1,0 +1,228 @@
+# Cursor IDE Rules for Express TypeScript Node Services
+
+## Project Overview
+
+- Node.js Express application with TypeScript
+- Architecture: Clean architecture with separation of concerns
+- Stack: Node.js 24, Express, TypeScript, Sequelize ORM
+- Testing: Mocha & Chai with comprehensive test coverage
+- Code Quality: ESLint + Prettier for consistent formatting
+- Deployment: Docker containerization with health checks
+
+## Code Style Guidelines
+
+### TypeScript
+
+- Use TypeScript strict mode (`strictNullChecks`, `noImplicitAny`, etc.)
+- Always explicitly type function parameters and return types
+- Use type guards for runtime type checking
+- Prefer `unknown` over `any`
+- Use union types and literal types for better type safety
+- Utilize utility types: `Partial<T>`, `Pick<T>`, `Omit<T>`, etc.
+
+### Code Formatting
+
+- Follow ESLint configuration in `eslint.config.js`
+- Use Prettier for automatic code formatting
+- Single quotes for strings, double quotes for JSX attributes
+- 2 spaces for indentation
+- Trailing commas where valid
+- Semicolons required
+- Maximum line length: 100 characters
+
+### Modern JavaScript/TypeScript
+
+- Prefer `const` over `let`, avoid `var`
+- Use async/await instead of Promise chains
+- Prefer arrow functions for callbacks and short functions
+- Use template literals for string interpolation
+- Destructuring assignments where appropriate
+- Use optional chaining (`?.`) and nullish coalescing (`??`)
+
+## Project Structure
+
+### Core Directories
+
+```
+src/
+├── Config/           # Environment and application configuration
+├── Controller/       # HTTP request handlers (thin layer)
+├── Services/         # Business logic and data processing
+├── Middleware/       # Express middleware functions
+├── Routes/          # API route definitions
+├── Entities/        # Database models and interfaces
+└── Plugins/         # External integrations and plugins
+```
+
+### File Naming Conventions
+
+- Use PascalCase for classes and interfaces: `UserService.ts`
+- Use camelCase for files containing functions: `userRoutes.ts`
+- Use kebab-case for configuration files: `database-config.ts`
+- Test files: `*.test.ts` or `*.spec.ts`
+
+## Development Workflow
+
+### Commands
+
+- `npm run dev` - Development server with hot reload (nodemon)
+- `npm run build` - Compile TypeScript to JavaScript
+- `npm start` - Run production build
+- `npm test` - Execute unit tests with Mocha
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run lint` - Lint code with ESLint
+- `npm run lint:fix` - Auto-fix linting issues
+- `npm run format` - Format code with Prettier
+
+### Docker
+
+- Use `docker-compose up` for local development with services
+- Build production image: `docker build -t app-name .`
+- Health checks are configured at `/health` endpoint
+- Multi-stage build optimizes image size
+
+## Architecture Principles
+
+### Separation of Concerns
+
+- **Controllers**: Handle HTTP requests/responses only
+- **Services**: Contain business logic and data transformation
+- **Middleware**: Cross-cutting concerns (auth, logging, validation)
+- **Entities**: Data models and database schema definitions
+- **Routes**: API endpoint definitions and route handlers
+
+### Dependency Injection
+
+- Use constructor injection for service dependencies
+- Keep dependencies explicit and testable
+- Avoid circular dependencies
+
+### Error Handling
+
+- Use custom error classes extending `Error`
+- Implement global error middleware
+- Always handle async errors with try-catch
+- Return consistent error response format
+- Log errors with appropriate context
+
+## API Design
+
+### REST Conventions
+
+- Use proper HTTP methods (GET, POST, PUT, DELETE, PATCH)
+- Consistent URL patterns: `/api/v1/resource/:id`
+- Use appropriate HTTP status codes
+- Include proper headers (Content-Type, CORS)
+
+### Request/Response Format
+
+```typescript
+// Request validation
+interface CreateUserRequest {
+  name: string;
+  email: string;
+  password: string;
+}
+
+// Consistent response format
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  message?: string;
+  error?: string;
+}
+```
+
+### Validation
+
+- Validate all incoming request data
+- Use middleware for common validations
+- Return detailed validation error messages
+- Sanitize user inputs to prevent XSS
+
+## Database Best Practices
+
+### Sequelize ORM
+
+- Define models in `src/Entities/`
+- Use TypeScript interfaces for model attributes
+- Implement proper associations and foreign keys
+- Use migrations for schema changes
+- Index frequently queried columns
+
+### Data Integrity
+
+- Always validate data before database operations
+- Use transactions for multi-table operations
+- Implement soft deletes where appropriate
+- Handle database connection errors gracefully
+
+## Testing Strategy
+
+### Unit Tests
+
+- Test all service methods and business logic
+- Mock external dependencies (database, APIs)
+- Use descriptive test names and arrange-act-assert pattern
+- Aim for 80%+ code coverage
+
+### Integration Tests
+
+- Test API endpoints end-to-end
+- Use test database for integration tests
+- Test error scenarios and edge cases
+- Validate request/response formats
+
+### Test Organization
+
+```typescript
+// Example test structure
+describe('UserService', () => {
+  describe('createUser', () => {
+    it('should create user with valid data', async () => {
+      // Test implementation
+    });
+
+    it('should throw error for duplicate email', async () => {
+      // Test implementation
+    });
+  });
+});
+```
+
+## Security Guidelines
+
+- Use environment variables for sensitive configuration
+- Implement rate limiting for APIs
+- Validate and sanitize all user inputs
+- Use HTTPS in production
+- Implement proper authentication and authorization
+- Hash passwords using bcrypt
+- Use CORS appropriately
+- Keep dependencies updated
+
+## Performance Optimization
+
+- Use connection pooling for database
+- Implement caching where appropriate
+- Optimize database queries (avoid N+1 problems)
+- Use compression middleware
+- Monitor application performance
+- Implement proper logging levels
+
+## Logging Strategy
+
+- Use structured logging with winston
+- Log levels: error, warn, info, debug
+- Include request IDs for traceability
+- Log errors with stack traces
+- Avoid logging sensitive information
+- Use log rotation for production
+
+## Environment Configuration
+
+- Use `.env` files for environment variables
+- Provide `.env.example` template
+- Validate required environment variables on startup
+- Use different configs for dev/staging/production
+- Never commit sensitive data to version control
