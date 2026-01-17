@@ -180,7 +180,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"email\": \"user@example.com\",\n      \"firstName\": \"John\",\n      \"lastName\": \"Doe\",\n      \"createdAt\": \"2025-12-19T10:00:00.000Z\",\n      \"updatedAt\": \"2025-12-19T10:00:00.000Z\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"550e8400-e29b-41d4-a716-446655440000\",\n      \"email\": \"user@example.com\",\n      \"firstName\": \"John\",\n      \"lastName\": \"Doe\",\n      \"createdAt\": \"2025-12-19T10:00:00.000Z\",\n      \"updatedAt\": \"2025-12-19T10:00:00.000Z\"\n    }\n  ]\n}"
             }
           ]
         },
@@ -208,8 +208,8 @@
               "variable": [
                 {
                   "key": "id",
-                  "value": "1",
-                  "description": "User ID (positive integer)"
+                  "value": "550e8400-e29b-41d4-a716-446655440000",
+                  "description": "User ID (UUID format)"
                 }
               ]
             },
