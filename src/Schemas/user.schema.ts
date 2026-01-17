@@ -53,7 +53,7 @@ export const getUserByIdParamsSchema = {
   properties: {
     id: {
       type: 'string',
-      pattern: '^[1-9]\\d*$',
+      pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
     },
   },
   required: ['id'],

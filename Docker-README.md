@@ -10,7 +10,7 @@ This document provides instructions for running the Express TypeScript applicati
 ## Files Overview
 
 - `Dockerfile`: Defines how to build the application container
-- `docker-compose.yml`: Orchestrates the application and MySQL database
+- `docker-compose.yml`: Orchestrates the application and ScyllaDB database
 - `.dockerignore`: Specifies files to exclude from the Docker build context
 - `healthcheck.js`: Health check script for container monitoring
 
@@ -58,15 +58,16 @@ This document provides instructions for running the Express TypeScript applicati
 
 The application supports the following environment variables:
 
-| Variable      | Description       | Default       |
-| ------------- | ----------------- | ------------- |
-| `NODE_ENV`    | Environment mode  | `development` |
-| `PORT`        | Application port  | `3000`        |
-| `DB_HOST`     | Database host     | `localhost`   |
-| `DB_PORT`     | Database port     | `3306`        |
-| `DB_NAME`     | Database name     | `express_db`  |
-| `DB_USERNAME` | Database username | `root`        |
-| `DB_PASSWORD` | Database password | `password`    |
+| Variable            | Description                   | Default       |
+| ------------------- | ----------------------------- | ------------- |
+| `NODE_ENV`          | Environment mode              | `development` |
+| `PORT`              | Application port              | `3000`        |
+| `DB_CONTACT_POINTS` | Database contact points       | `localhost`   |
+| `DB_PORT`           | Database port                 | `9042`        |
+| `DB_KEYSPACE`       | Database keyspace             | `express_db`  |
+| `DB_DATACENTER`     | Database datacenter           | `datacenter1` |
+| `DB_USERNAME`       | Database username (optional)  | (empty)       |
+| `DB_PASSWORD`       | Database password (optional)  | (empty)       |
 
 ## Development
 
@@ -97,7 +98,7 @@ For development with hot reload, you can override the Docker Compose configurati
 
 - Application: http://localhost:3000
 - Health Check: http://localhost:3000/api/health
-- Database: localhost:3306 (when using docker-compose)
+- Database: localhost:9042 (when using docker-compose)
 
 ## Useful Commands
 
@@ -125,9 +126,10 @@ For development with hot reload, you can override the Docker Compose configurati
    - Or stop the conflicting service
 
 2. **Database connection issues:**
-   - Ensure MySQL container is running
+   - Ensure ScyllaDB container is running
    - Check environment variables
    - Verify network connectivity
+   - Check ScyllaDB status: `docker-compose exec scylla nodetool status`
 
 3. **Build failures:**
    - Clear Docker cache: `docker system prune`

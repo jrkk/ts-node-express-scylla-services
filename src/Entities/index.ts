@@ -3,4 +3,4 @@
  * Barrel export for all database entities/models
  */
 
-export { User } from './User';
+export { UserAttributes, UserCreationAttributes } from './User';

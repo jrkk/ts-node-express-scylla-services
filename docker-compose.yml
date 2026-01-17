@@ -8,32 +8,37 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_NAME=express_db
-      - DB_USERNAME=root
-      - DB_PASSWORD=password
+      - DB_CONTACT_POINTS=scylla
+      - DB_PORT=9042
+      - DB_KEYSPACE=express_db
+      - DB_DATACENTER=datacenter1
+      - DB_USERNAME=
+      - DB_PASSWORD=
     depends_on:
-      - mysql
+      - scylla
     restart: unless-stopped
     networks:
       - app-network
 
-  mysql:
-    image: mysql:8.0
-    environment:
-      - MYSQL_DATABASE=express_db
-      - MYSQL_ROOT_PASSWORD=password
+  scylla:
+    image: scylladb/scylla:latest
+    command: --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
     ports:
-      - '3306:3306'
+      - '9042:9042'
+      - '10000:10000'
     volumes:
-      - mysql_data:/var/lib/mysql
+      - scylla_data:/var/lib/scylla
     restart: unless-stopped
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
 volumes:
-  mysql_data:
+  scylla_data:
 
 networks:
   app-network:

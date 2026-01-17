@@ -34,7 +34,7 @@ export const getUserById = async (
 ): Promise<void> => {
   try {
     // req.params.id is already validated by middleware
-    const userId = parseInt(req.params.id, 10);
+    const userId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
     const user = await userService.getUserById(userId);
     if (!user) {
       res.status(404).json({

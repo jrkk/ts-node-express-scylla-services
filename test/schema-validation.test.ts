@@ -70,18 +70,18 @@ describe('Schema Validation', () => {
     });
 
     describe('getUserByIdParams validation', () => {
-      it('should validate valid user ID parameter', () => {
+      it('should validate valid UUID parameter', () => {
         const validParams = {
-          id: '123',
+          id: '550e8400-e29b-41d4-a716-446655440000',
         };
 
         const result = schemaValidator.validateGetUserByIdParams(validParams);
         expect(result.isValid).to.be.true;
       });
 
-      it('should reject invalid user ID parameter', () => {
+      it('should reject invalid UUID format', () => {
         const invalidParams = {
-          id: '0',
+          id: '123',
         };
 
         const result = schemaValidator.validateGetUserByIdParams(invalidParams);
@@ -89,9 +89,9 @@ describe('Schema Validation', () => {
         expect(result.errors).to.be.an('array');
       });
 
-      it('should reject non-numeric user ID', () => {
+      it('should reject non-UUID string', () => {
         const invalidParams = {
-          id: 'abc',
+          id: 'not-a-uuid',
         };
 
         const result = schemaValidator.validateGetUserByIdParams(invalidParams);

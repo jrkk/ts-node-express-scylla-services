@@ -23,7 +23,7 @@ The project includes several Docker-related files:
 | File                 | Purpose                                                  |
 | -------------------- | -------------------------------------------------------- |
 | `Dockerfile`         | Defines how to build the application container           |
-| `docker-compose.yml` | Orchestrates the application and MySQL database     |
+| `docker-compose.yml` | Orchestrates the application and ScyllaDB database     |
 | `.dockerignore`      | Specifies files to exclude from the Docker build context |
 
 ## 🚀 Quick Start
@@ -87,7 +87,7 @@ docker-compose up -d
 Start specific services:
 
 ```bash
-docker-compose up mysql  # Only database
+docker-compose up scylla  # Only database
 docker-compose up app       # Only application (requires running database)
 ```
 
@@ -129,7 +129,7 @@ View logs from specific service:
 
 ```bash
 docker-compose logs app      # Application logs
-docker-compose logs mysql # Database logs
+docker-compose logs scylla # Database logs
 ```
 
 ### Managing Containers
@@ -145,7 +145,7 @@ Execute commands in running container:
 ```bash
 docker-compose exec app sh                    # Open shell in app container
 docker-compose exec app npm test             # Run tests in container
-docker-compose exec mysql mysql -u root -p   # Connect to database
+docker-compose exec scylla cqlsh             # Connect to database
 ```
 
 ## 🌍 Environment Configuration
@@ -154,22 +154,20 @@ The Docker setup uses environment variables defined in `docker-compose.yml`:
 
 ### Application Environment Variables
 
-| Variable      | Default Value | Description         |
-| ------------- | ------------- | ------------------- |
-| `NODE_ENV`    | `production`  | Node.js environment |
-| `PORT`        | `3000`        | Application port    |
-| `DB_HOST`     | `mysql`    | Database host       |
-| `DB_PORT`     | `3306`        | Database port       |
-| `DB_NAME`     | `express_db`  | Database name       |
-| `DB_USERNAME` | `root`    | Database username   |
-| `DB_PASSWORD` | `password`    | Database password   |
+| Variable             | Default Value  | Description                 |
+| -------------------- | -------------- | --------------------------- |
+| `NODE_ENV`           | `production`   | Node.js environment         |
+| `PORT`               | `3000`         | Application port            |
+| `DB_CONTACT_POINTS`  | `scylla`       | Database contact points     |
+| `DB_PORT`            | `9042`         | Database port               |
+| `DB_KEYSPACE`        | `express_db`   | Database keyspace           |
+| `DB_DATACENTER`      | `datacenter1`  | Database datacenter         |
+| `DB_USERNAME`        | (empty)        | Database username (optional)|
+| `DB_PASSWORD`        | (empty)        | Database password (optional)|
 
 ### Database Environment Variables
 
-| Variable              | Default Value | Description       |
-| --------------------- | ------------- | ----------------- |
-| `MYSQL_DATABASE`      | `express_db`  | Database name     |
-| `MYSQL_ROOT_PASSWORD` | `password`    | Root password     |
+ScyllaDB uses command-line arguments for configuration. See `docker-compose.yml` for the configured options.
 
 ### Custom Environment Variables
 
@@ -232,10 +230,16 @@ curl http://localhost:3000/health
 
 ### Accessing the Database
 
-Connect to MySQL database:
+Connect to ScyllaDB database:
 
 ```bash
-docker-compose exec mysql mysql -u root -p express_db
+docker-compose exec scylla cqlsh
+```
+
+View keyspaces:
+
+```bash
+docker-compose exec scylla cqlsh -e "DESCRIBE KEYSPACES"
 ```
 
 ### Database Persistence
@@ -246,22 +250,32 @@ Database data is persisted using Docker volumes:
 # View volumes
 docker volume ls
 
-# Inspect the mysql volume
-docker volume inspect express-ts-node-services_mysql_data
+# Inspect the scylla volume
+docker volume inspect express-ts-node-services_scylla_data
 ```
 
 ### Database Backup and Restore
 
-Create a backup:
+Create a backup using CQL shell:
 
 ```bash
-docker-compose exec mysql mysqldump -u root -p express_db > backup.sql
+# Backup schema
+docker-compose exec scylla cqlsh -e "DESCRIBE KEYSPACE express_db" > schema_backup.cql
+
+# Export data using COPY command
+docker-compose exec scylla cqlsh -e "COPY express_db.users TO '/tmp/users.csv' WITH HEADER=true"
+docker cp scylla_container_name:/tmp/users.csv ./users_backup.csv
 ```
 
 Restore from backup:
 
 ```bash
-docker-compose exec -T mysql mysql -u root -p express_db < backup.sql
+# Restore schema
+docker-compose exec -T scylla cqlsh < schema_backup.cql
+
+# Import data
+docker cp ./users_backup.csv scylla_container_name:/tmp/users.csv
+docker-compose exec scylla cqlsh -e "COPY express_db.users FROM '/tmp/users.csv' WITH HEADER=true"
 ```
 
 ## 🐛 Troubleshooting
@@ -279,11 +293,14 @@ docker-compose exec -T mysql mysql -u root -p express_db < backup.sql
 2. **Database connection issues**:
 
    ```bash
-   # Check if mysql container is running
+   # Check if scylla container is running
    docker-compose ps
 
-   # Check mysql logs
-   docker-compose logs mysql
+   # Check scylla logs
+   docker-compose logs scylla
+   
+   # Verify ScyllaDB is ready
+   docker-compose exec scylla nodetool status
    ```
 
 3. **Build failures**:
@@ -416,7 +433,8 @@ networks:
 - [Docker Documentation](https://docs.docker.com/)
 - [Docker Compose Documentation](https://docs.docker.com/compose/)
 - [Node.js Docker Best Practices](https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md)
-- [MySQL Docker Hub](https://hub.docker.com/_/mysql)
+- [ScyllaDB Docker Hub](https://hub.docker.com/r/scylladb/scylla)
+- [ScyllaDB Documentation](https://docs.scylladb.com/)
 
 ## 🆘 Getting Help
 
